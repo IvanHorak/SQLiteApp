@@ -2,8 +2,11 @@ package ivan.tutorial.sqliteapp;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.ArrayList;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
 
@@ -61,12 +64,36 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         database.update(TABLE_NAME, contentValues, COLUMN_ID + " = ?", new String[]{contact.getID
                 ()});
         database.close();
-        
+
     }
 
     public void deleteRecord(ContactModel contact){
 
+        database = this.getReadableDatabase();
+        database.delete(TABLE_NAME, COLUMN_ID + " = ?", new String[]{contact.getID()});
+        database.close();
 
+    }
+
+    public ArrayList<ContactModel> getAllRecords(){
+
+        database = this.getReadableDatabase();
+        Cursor cursor = database.rawQuery("SELECT * FROM" + TABLE_NAME, null);
+        ArrayList<ContactModel> contacts = new ArrayList<ContactModel>();
+        ContactModel contactModel;
+        if(cursor.getCount() > 0){
+            for(int i = 0; i < cursor.getCount(); i++){
+                cursor.moveToNext();
+                contactModel = new ContactModel();
+                contactModel.setID(cursor.getString(0));
+                contactModel.setFirstName(cursor.getString(1));
+                contactModel.setLastName(cursor.getString(2));
+                contacts.add(contactModel);
+            }
+        }
+        cursor.close();
+        database.close();
+        return contacts;
     }
 
 
